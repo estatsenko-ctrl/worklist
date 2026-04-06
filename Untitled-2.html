@@ -4,18 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Создать заявку</title>
+
 <style>
 body { margin: 0; font-family: Arial, sans-serif; background: #f5f6f8; }
 .container { max-width: 420px; margin: auto; padding: 20px; }
 .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
 h2 { margin-top: 0; }
-input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; }
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
 textarea { resize: none; height: 80px; }
-button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: black; color: white; font-size: 16px; cursor: pointer; }
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
 button:hover { opacity: 0.9; }
-.success { display: none; text-align: center; color: green; margin-top: 10px; }
+.success {
+  display: none;
+  text-align: center;
+  color: green;
+  margin-top: 10px;
+}
 </style>
 </head>
+
 <body>
 <div class="container">
   <div class="card">
@@ -43,7 +67,6 @@ button:hover { opacity: 0.9; }
     </select>
 
     <input id="customFirm" placeholder="Введите фирму" style="display:none;">
-
     <input id="department" placeholder="Подразделение">
     <input id="responsible" placeholder="Ответственное лицо">
     <input id="number" placeholder="Номер">
@@ -66,15 +89,21 @@ async function send() {
   let customFirm = document.getElementById("customFirm").value;
   let firm = firmSelect === "other" ? customFirm : firmSelect;
 
-  // Проверка обязательных полей
-  if (!firm || !document.getElementById("department").value || !document.getElementById("responsible").value || !document.getElementById("number").value || !document.getElementById("description").value) {
+  if (!firm ||
+      !document.getElementById("department").value ||
+      !document.getElementById("responsible").value ||
+      !document.getElementById("number").value ||
+      !document.getElementById("description").value) {
     alert("Пожалуйста, заполните все поля!");
     return;
   }
 
   try {
-    let response = await fetch("https://script.google.com/macros/shttps://script.google.com/macros/s/AKfycbyE7JYjjIlAPGa8BoiV5Gd15xXm7H_EvxQga56YVv6zTKFdeV7aAuL1edKP4Qi2X69R/exec/AKfycbwLraBs8zCH5jP_4GuQRCjVtb3uFmNwQ5mC3NmdXY-nr69cYpcQzbCv3chttps://script.google.com/macros/s/AKfycbyE7JYjjIlAPGa8BoiV5Gd15xXm7H_EvxQga56YVv6zTKFdeV7aAuL1edKP4Qi2X69R/execEq1rEE9fs/exec", {
+    let response = await fetch("https://script.google.com/macros/s/AKfycbyE7JYjjIlAPGa8BoiV5Gd15xXm7H_EvxQga56YVv6zTKFdeV7aAuL1edKP4Qi2X69R/exec", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         firm: firm,
         department: document.getElementById("department").value,
@@ -87,7 +116,6 @@ async function send() {
     if (response.ok) {
       document.getElementById("success").style.display = "block";
 
-      // Сбрасываем форму
       document.getElementById("firm").value = "";
       document.getElementById("customFirm").value = "";
       document.getElementById("customFirm").style.display = "none";
@@ -96,11 +124,13 @@ async function send() {
       document.getElementById("number").value = "";
       document.getElementById("description").value = "";
 
-      // Скрываем сообщение через 3 секунды
-      setTimeout(() => { document.getElementById("success").style.display = "none"; }, 3000);
+      setTimeout(() => {
+        document.getElementById("success").style.display = "none";
+      }, 3000);
     } else {
       alert("Ошибка при отправке заявки");
     }
+
   } catch (error) {
     alert("Ошибка: " + error.message);
   }
