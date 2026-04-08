@@ -4,19 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Создать заявку</title>
+
 <style>
 body { margin: 0; font-family: Arial, sans-serif; background: #f5f6f8; }
 .container { max-width: 420px; margin: auto; padding: 20px; }
 .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
 h2 { margin-top: 0; }
-input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; }
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
 textarea { resize: none; height: 80px; }
-button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: black; color: white; font-size: 16px; cursor: pointer; }
-button:hover { opacity: 0.9; }
-.success { display: none; text-align: center; color: green; margin-top: 10px; }
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+button:hover:not(:disabled) { opacity: 0.9; }
+
+.success {
+  display: none;
+  text-align: center;
+  color: green;
+  margin-top: 10px;
+}
 </style>
+
 </head>
 <body>
+
 <div class="container">
   <div class="card">
     <h2>Создать заявку</h2>
@@ -48,7 +78,7 @@ button:hover { opacity: 0.9; }
     <input id="number" placeholder="Номер">
     <textarea id="description" placeholder="Описание"></textarea>
 
-    <button onclick="send()">Отправить</button>
+    <button id="btn" onclick="send()">Отправить</button>
     <div class="success" id="success">✅ Отправлено!</div>
   </div>
 </div>
@@ -61,16 +91,28 @@ function checkFirm() {
 }
 
 async function send() {
-  let firmSelect = document.getElementById("firm").value;
-  let customFirm = document.getElementById("customFirm").value;
+  const btn = document.getElementById("btn");
+  btn.disabled = true;
+
+  let firmSelect = document.getElementById("firm").value.trim();
+  let customFirm = document.getElementById("customFirm").value.trim();
+
   let firm = firmSelect === "other" ? customFirm : firmSelect;
 
-  if (!firm ||
-      !document.getElementById("department").value ||
-      !document.getElementById("responsible").value ||
-      !document.getElementById("number").value ||
-      !document.getElementById("description").value) {
+  let department = document.getElementById("department").value.trim();
+  let responsible = document.getElementById("responsible").value.trim();
+  let number = document.getElementById("number").value.trim();
+  let description = document.getElementById("description").value.trim();
+
+  if (!firm || !department || !responsible || !number || !description) {
     alert("Пожалуйста, заполните все поля!");
+    btn.disabled = false;
+    return;
+  }
+
+  if (firmSelect === "other" && !customFirm) {
+    alert("Введите название фирмы");
+    btn.disabled = false;
     return;
   }
 
@@ -80,14 +122,16 @@ async function send() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         firm: firm,
-        department: document.getElementById("department").value,
-        responsible: document.getElementById("responsible").value,
-        number: document.getElementById("number").value,
-        description: document.getElementById("description").value
+        department: department,
+        responsible: responsible,
+        number: number,
+        description: description
       })
     });
 
-    if (response.ok) {
+    let text = await response.text();
+
+    if (text === "OK") {
       document.getElementById("success").style.display = "block";
 
       document.getElementById("firm").value = "";
@@ -98,15 +142,21 @@ async function send() {
       document.getElementById("number").value = "";
       document.getElementById("description").value = "";
 
-      setTimeout(() => { document.getElementById("success").style.display = "none"; }, 3000);
+      setTimeout(() => {
+        document.getElementById("success").style.display = "none";
+      }, 3000);
+
     } else {
-      alert("Ошибка при отправке заявки");
+      alert("Ошибка сервера: " + text);
     }
 
   } catch (error) {
-    alert("Ошибка: " + error.message);
+    alert("Ошибка сети: " + error.message);
   }
+
+  btn.disabled = false;
 }
 </script>
+
 </body>
 </html>
